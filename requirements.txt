@@ -1,0 +1,13 @@
+gradio>=4.31.0
+pandas
+matplotlib
+scikit-learn
+holidays
+statsmodels
+numpy
+plotly
+dash
+bcrypt
+pyotp
+qrcode
+pillow

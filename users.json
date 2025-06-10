@@ -1,0 +1,12 @@
+{
+  "admin@example.com": {
+    "password": "$2b$12$HASHDA SENHA BCRYPT",
+    "mfa_secret": "CHAVE_BASE32",
+    "verified": true
+  },
+  "henriquesx44@gmail.com": {
+    "password": "$2b$12$B.nGBjSln6e0DYaLkL6SFervSLJMj1K91IHEf/BE.9nhYXfCc4gf.",
+    "mfa_secret": "UE4VSMSF2GFOO5QFHDAZYJMSTOCWMEQU",
+    "verified": true
+  }
+}
