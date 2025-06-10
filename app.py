@@ -73,53 +73,48 @@ def carregar_e_processar_dados():
             skiprows=8
         )
         df.columns = [col.strip() for col in df.columns]
-        df = df.rename(columns={
-            "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)": "temperatura",
-            "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)": "precipitacao",
-            "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)": "pressao",
-            "UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)": "umidade"
-        })
-        numeric_cols = ["pressao", "temperatura", "precipitacao", "umidade"]
+        numeric_cols = ["PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)", "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)", "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)", "UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)"]
         for col in numeric_cols:
             df[col] = pd.to_numeric(df[col].astype(str).str.replace(',', '.'), errors='coerce')
         df["datetime"] = pd.to_datetime(df["Data"] + " " + df["Hora UTC"], errors='coerce')
         df["hora"] = df["datetime"].dt.hour
         df["mes"] = df["datetime"].dt.month
-        df = df[["temperatura", "precipitacao", "pressao", "umidade", "hora", "mes"]].dropna()
-        df = df.astype({
-            'temperatura': 'float64',
-            'precipitacao': 'float64',
-            'pressao': 'float64',
-            'umidade': 'float64',
+        df = df[df["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"].notna()]
+        df_previsao = df[["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)", "PRECIPITAÇÃO TOTAL, HORÁRIO (mm)", "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)", "UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)", "hora", "mes"]].dropna().copy()
+        df_previsao = df.astype({
+            'TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)': 'float64',
+            'PRECIPITAÇÃO TOTAL, HORÁRIO (mm)': 'float64',
+            'PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)': 'float64',
+            'UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)': 'float64',
             'hora': 'int64',
             'mes': 'int64'
         })
         if len(df) > 10000:
             df = df.sample(n=10000, random_state=42)
-        return df
+        return df_previsao, df
     except Exception:
         np.random.seed(42)
         n_samples = 1000
         return pd.DataFrame({
-            'temperatura': np.random.normal(25, 5, n_samples),
-            'precipitacao': np.random.exponential(2, n_samples),
-            'pressao': np.random.normal(1013, 10, n_samples),
-            'umidade': np.random.uniform(30, 90, n_samples),
+            "TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)": np.random.normal(25, 5, n_samples),
+            'PRECIPITAÇÃO TOTAL, HORÁRIO (mm)': np.random.exponential(2, n_samples),
+            'PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)': np.random.normal(1013, 10, n_samples),
+            'UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)': np.random.uniform(30, 90, n_samples),
             'hora': np.random.randint(0, 24, n_samples),
             'mes': np.random.randint(1, 13, n_samples)
         })
 
 def treinar_modelo(df):
-    feature_cols = ["precipitacao", "pressao", "umidade", "hora", "mes"]
+    feature_cols = ["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)", "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)", "UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)", "hora", "mes"]
     X = df[feature_cols]
-    y = df["temperatura"]
+    y = df["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     modelo = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
     modelo.fit(X_train, y_train)
     return modelo
 
-df = carregar_e_processar_dados()
-modelo = treinar_modelo(df)
+df_previsao, df = carregar_e_processar_dados()
+modelo = treinar_modelo(df_previsao)
 
 def prever_temperatura(precipitacao, pressao, umidade, hora, mes):
     entrada = pd.DataFrame([{
@@ -136,9 +131,9 @@ def prever_temperatura(precipitacao, pressao, umidade, hora, mes):
     return round(pred, 2), fig1, fig2, fig3
 
 def gerar_graficos(modelo, df):
-    feature_cols = ["precipitacao", "pressao", "umidade", "hora", "mes"]
+    feature_cols = ["PRECIPITAÇÃO TOTAL, HORÁRIO (mm)", "PRESSAO ATMOSFERICA AO NIVEL DA ESTACAO, HORARIA (mB)", "UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)", "hora", "mes"]
     X = df[feature_cols]
-    y = df["temperatura"]
+    y = df["TEMPERATURA DO AR - BULBO SECO, HORARIA (°C)"]
     y_pred = modelo.predict(X)
     fig1, ax1 = plt.subplots()
     ax1.scatter(y, y_pred, alpha=0.5)
@@ -175,13 +170,59 @@ with gr.Blocks() as app:
         )
 
     with gr.Tabs() as abas:
+        print(df.columns)
+        colunas_numericas = df.drop(columns=["Unnamed: 19", "hora", "mes", 'datetime', 'Data', 'Hora UTC']).columns.tolist()
+        def gerar_grafico_meteorologico(variaveis, tipo_grafico, agregacao, titulo, grid):
+            if not variaveis:
+                return None
+            if agregacao == "Hora":
+                df_agg = df[["Data", "Hora UTC"] + variaveis].copy()
+                df_agg["DataHora"] = pd.to_datetime(df_agg["Data"].dt.strftime("%Y-%m-%d") + " " + df_agg["Hora UTC"], errors='coerce')
+                dados = df_agg.dropna(subset=["DataHora"] + variaveis)
+                media = dados.groupby(dados["DataHora"].dt.hour)[variaveis].mean()
+                eixo_x = media.index
+                xlabel = "Hora do Dia (UTC)"
+            elif agregacao == "Dia":
+                dados = df[["Data"] + variaveis].dropna()
+                media = dados.groupby("Data")[variaveis].mean()
+                eixo_x = media.index
+                xlabel = "Data"
+            else:  # Mês
+                dados = df[["Data"] + variaveis].dropna()
+                media = dados.groupby(dados["Data"].dt.to_period("M"))[variaveis].mean()
+                media.index = media.index.to_timestamp()
+                eixo_x = media.index
+                xlabel = "Mês"
+
+            fig, ax = plt.subplots(figsize=(10, 6))
+            if tipo_grafico == "Linha":
+                for var in variaveis:
+                    ax.plot(eixo_x, media[var], marker="o", label=var)
+            elif tipo_grafico == "Barras":
+                largura = 0.8 / len(variaveis)
+                for i, var in enumerate(variaveis):
+                    deslocamento = pd.to_timedelta(i * largura, unit='D') - pd.to_timedelta(largura * len(variaveis) / 2, unit='D')
+                    ax.bar(eixo_x + deslocamento, media[var], width=largura, label=var)
+            else:
+                for var in variaveis:
+                    ax.fill_between(eixo_x, media[var], alpha=0.5, label=var)
+
+            ax.set_title(titulo if titulo.strip() else "Gráfico Meteorológico")
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel("Valor")
+            ax.grid(grid)
+            ax.legend()
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            return fig
+
         # Criar abas "Previsão" e "Análise Avançada" primeiro para definir grupos
         with gr.Tab("Previsão") as tab_previsao:
             with gr.Group(visible=False, elem_id="grupo_previsao") as grupo_previsao:
                 gr.Markdown("## Previsão de Temperatura com Random Forest")
-                inp1 = gr.Slider(0, 50, label="Precipitação (mm)")
-                inp2 = gr.Slider(900, 1050, label="Pressão (mB)")
-                inp3 = gr.Slider(0, 100, label="Umidade (%)")
+                inp1 = gr.Slider(0, 50, label="PRECIPITAÇÃO TOTAL, HORÁRIO (mm)")
+                inp2 = gr.Slider(900, 1050, label="PRESSÃO ATMOSFERICA AO NIVEL DA ESTACAO")
+                inp3 = gr.Slider(0, 100, label="UMIDADE REL. MAX. NA HORA ANT. (AUT) (%)")
                 inp4 = gr.Slider(0, 23, step=1, label="Hora do dia")
                 inp5 = gr.Slider(1, 12, step=1, label="Mês")
                 botao_prever = gr.Button("Prever Temperatura")
@@ -194,26 +235,21 @@ with gr.Blocks() as app:
                     inputs=[inp1, inp2, inp3, inp4, inp5],
                     outputs=[saida_previsao, graf1, graf2, graf3]
                 )
-        with gr.Tab("Análise Avançada") as tab_avancada:
-            with gr.Group(visible=False) as grupo_avancado:
-                gr.Markdown("## Análise Avançada de Temperatura")
-                gr.Markdown("Insira os mesmos dados para realizar análises adicionais.")
-                inp1_adv = gr.Slider(0, 50, label="Precipitação (mm)")
-                inp2_adv = gr.Slider(900, 1050, label="Pressão (mB)")
-                inp3_adv = gr.Slider(0, 100, label="Umidade (%)")
-                inp4_adv = gr.Slider(0, 23, step=1, label="Hora do dia")
-                inp5_adv = gr.Slider(1, 12, step=1, label="Mês")
-                botao_analise = gr.Button("Executar Análise")
-                analise_graf1 = gr.Plot(label="Dispersão")
-                analise_graf2 = gr.Plot(label="Importância")
-                analise_graf3 = gr.Plot(label="Erro")
-                resultado = gr.Number(label="Temperatura Prevista (°C)")
-                botao_analise.click(
-                    prever_temperatura,
-                    inputs=[inp1_adv, inp2_adv, inp3_adv, inp4_adv, inp5_adv],
-                    outputs=[resultado, analise_graf1, analise_graf2, analise_graf3]
-                )
+        with gr.Tab("Análise Avançada"):
+            with gr.Group(visible=False, elem_id="grupo_avancado") as grupo_avancado:
+                variaveis = gr.CheckboxGroup(choices=colunas_numericas, label="Variáveis")
+                tipo_grafico = gr.Radio(["Linha", "Barras", "Área"], label="Tipo de gráfico", value="Linha")
+                agregacao = gr.Radio(["Hora", "Dia", "Mês"], label="Agregação", value="Hora")
+                titulo = gr.Textbox(label="Título do gráfico (opcional)")
+                grid = gr.Checkbox(label="Mostrar grade", value=True)
+                botao = gr.Button("Executar Análise")
+                grafico = gr.Plot(label="Gráfico Gerado")
 
+                botao.click(
+                    gerar_grafico_meteorologico,
+                    inputs=[variaveis, tipo_grafico, agregacao, titulo, grid],
+                    outputs=grafico
+                )
         # Agora sim, defina a aba Login que usa esses grupos
         with gr.Tab("Login"):
             login_email = gr.Textbox(label="Email")
