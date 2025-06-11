@@ -4,11 +4,10 @@ matplotlib
 scikit-learn
 holidays
 statsmodels
-numpy
+numpy>=1.24
 plotly
 dash
 bcrypt
 pyotp
 qrcode
 pillow
-io
