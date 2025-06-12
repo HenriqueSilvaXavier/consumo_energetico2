@@ -146,4 +146,4 @@ with gr.Blocks() as app:
                 outputs=[saida_cadastro, qr_code]
             )
 
-app.launch(server_name="0.0.0.0", server_port=8080)
+app.launch(server_name="127.0.0.1", server_port=7860)
