@@ -131,7 +131,13 @@ O relatório a seguir apresenta as visualizações gráficas geradas a partir do
 📄 **Relatório de Gráficos:** [Clique aqui para visualizar](https://docs.google.com/document/d/1QVsBIPr93vxZMiE85ktjTHjnSghlBFm-ecSB3PuRYtw/edit?usp=sharing)
 
 ## 👥 Equipe 
-Gabriela Maia, Flavia Paloma, Elias Ramos, Henrique Xavier, Rafael Thomas e Yan Libni 
+- Gabriela Maia
+- Flavia Paloma
+- Elias Ramos
+- Henrique Xavier
+- Rafael Thomas
+- Yan Libni
+
 ## 👩‍💻 Turma: 
 ADS032/4M
 
