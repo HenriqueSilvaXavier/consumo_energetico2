@@ -8,5 +8,15 @@
     "password": "$2b$12$B.nGBjSln6e0DYaLkL6SFervSLJMj1K91IHEf/BE.9nhYXfCc4gf.",
     "mfa_secret": "UE4VSMSF2GFOO5QFHDAZYJMSTOCWMEQU",
     "verified": true
+  },
+  "eliasasd321@gmail.com": {
+    "password": "$2b$12$vZ4vXn921p/TI4AddN/Ri.GG3jpBTD6fnPvfO/.26YhSLpLa0gMFm",
+    "mfa_secret": "7COEVIXZPZ6UAYJQ2J4G342NAFKDF6FE",
+    "verified": true
+  },
+  "blabla@gmail.com": {
+    "password": "$2b$12$s4ipkTekI/IjQIgW3BGh/uTeh15ruZ/hPyw8y5tr02EUJD9pUW5xq",
+    "mfa_secret": "5BEDVZ6W5S3FOZLAKKN62FWMMQ6WWZKP",
+    "verified": true
   }
 }
