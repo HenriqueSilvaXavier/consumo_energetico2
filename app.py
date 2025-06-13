@@ -34,7 +34,7 @@ with gr.Blocks() as app:
                 )
         with gr.Tab("Gráfico Metereológico"):
             with gr.Group(visible=False, elem_id="grupo_avancado") as grupo_avancado:
-                variaveis = gr.CheckboxGroup(choices=colunas_numericas, label="Variáveis")
+                variaveis = gr.Dropdown(choices=colunas_numericas, multiselect=True, label="Variáveis")
                 tipo_grafico = gr.Radio(["Linha", "Barras", "Área"], label="Tipo de gráfico", value="Linha")
                 agregacao = gr.Radio(["Hora", "Dia", "Mês"], label="Agregação", value="Hora")
                 titulo = gr.Textbox(label="Título do gráfico (opcional)")
