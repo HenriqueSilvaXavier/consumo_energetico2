@@ -7,14 +7,6 @@ from io import BytesIO
 from PIL import Image
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
-import holidays
-from sklearn.preprocessing import LabelEncoder
-from statsmodels.tsa.seasonal import seasonal_decompose
-import plotly.express as px
 import io
 
 USERS_DB = "users.json"

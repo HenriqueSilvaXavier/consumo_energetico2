@@ -45,7 +45,6 @@ def gerar_graficos_feriados(subsistema, mostrar_feriados, comparar_feriados, dat
 
     if data_inicio:
         df_sub = df_sub[df_sub['din_instante'] >= pd.to_datetime("2020-"+data_inicio)]
-        print(data_inicio)
     if data_fim:
         df_sub = df_sub[df_sub['din_instante'] <= pd.to_datetime("2020-"+data_fim)]
 

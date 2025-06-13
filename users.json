@@ -18,5 +18,10 @@
     "password": "$2b$12$s4ipkTekI/IjQIgW3BGh/uTeh15ruZ/hPyw8y5tr02EUJD9pUW5xq",
     "mfa_secret": "5BEDVZ6W5S3FOZLAKKN62FWMMQ6WWZKP",
     "verified": true
+  },
+  "rodrigoxgamer@gmail.com": {
+    "password": "$2b$12$KpcdgX6p5Ls9vL9/fnl7tuaKEnWt1dqWeTHyFYLcVOJJuUPVR.lEG",
+    "mfa_secret": "FMCEXSQOYJ5SPYV33H6HSAPT2QZMYYTQ",
+    "verified": true
   }
 }
