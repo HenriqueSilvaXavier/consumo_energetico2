@@ -75,7 +75,6 @@ A aplicação está disponível via Render:
 | `INMET_NE_PE_A301_2020.csv`       | Clima (INMET) - Recife |
 | `populacao_recife_2020.csv`       | Crescimento populacional |
 | `requirements.txt`                | Dependências Python |
-| `Dockerfile`                      | Build da aplicação para container |
 | `start.sh`                        | Script de inicialização |
 | `Procfile`                        | Para compatibilidade com deploys |
 
