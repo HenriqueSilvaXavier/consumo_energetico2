@@ -110,8 +110,8 @@ A aplicação está disponível via Render:
 ## ▶️ Execução Local
 
 ```bash
-git clone https://github.com/seu-usuario/otimizador-energia.git
-cd otimizador-energia
+git clone https://github.com/seu-usuario/consumo-energia2.git
+cd consumo-energia2
 
 python -m venv venv
 source venv/bin/activate  # ou venv\Scripts\activate no Windows
